@@ -4,6 +4,7 @@ from rest_framework import status
 from .models import Category, Product, Review
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
 
+
 # --- КАТЕГОРИИ ---
 
 @api_view(['GET'])
@@ -45,6 +46,14 @@ def product_detail_api_view(request, id):
         return Response(data={'errors': 'Товар не найден'}, status=status.HTTP_404_NOT_FOUND)
     
     serializer = ProductSerializer(product)
+    return Response(data=serializer.data)
+
+@api_view(['GET'])
+def product_reviews_list_api_view(request):
+    """Вывод списка товаров с их отзывами и средним баллом"""
+    products = Product.objects.all()
+    # Используем наш новый сериализатор ProductReviewsSerializer
+    serializer = ProductReviewsSerializer(products, many=True)
     return Response(data=serializer.data)
 
 
