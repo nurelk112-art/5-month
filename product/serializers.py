@@ -6,8 +6,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'text', 'stars', 'product']
 
-
 class CategorySerializer(serializers.ModelSerializer):
+    # Оставляем только базовые поля для создания/изменения
+    class Meta:
+        model = Category
+        fields = ['id', 'name']
+
+class CategoryListSerializer(serializers.ModelSerializer):
+    # Отдельный сериализатор для вывода списка (с подсчетом)
     products_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -17,16 +23,12 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_products_count(self, category):
         return category.products.count()
 
-
-# --- ВОТ ЭТОТ КЛАСС НУЖНО ДОБАВИТЬ/ВЕРНУТЬ ---
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__' 
-
+        fields = ['id', 'title', 'description', 'price', 'category']
 
 class ProductReviewsSerializer(serializers.ModelSerializer):
-    """Специальный сериализатор для вывода товаров вместе с их отзывами и средним рейтингом"""
     reviews = ReviewSerializer(many=True, read_only=True)
     rating = serializers.SerializerMethodField()
 
@@ -38,6 +40,5 @@ class ProductReviewsSerializer(serializers.ModelSerializer):
         reviews = product.reviews.all()
         if not reviews.exists():
             return 0.0
-        
         total_stars = sum([review.stars for review in reviews])
         return round(total_stars / reviews.count(), 1)
